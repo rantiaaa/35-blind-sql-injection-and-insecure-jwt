@@ -29,6 +29,7 @@ $result = $stmt->get_result();
             <a href="my-account.php">My Account</a>
         </div>
         <div>
+            <a href="login.php">Login/Register</a>
             <a href="logout.php">Logout</a>
         </div>
     </div>
@@ -44,7 +45,13 @@ $result = $stmt->get_result();
             <?php while ($row = $result->fetch_assoc()): ?>
                 <div class="article">
                     <h3><?php echo htmlspecialchars($row['title']); ?></h3>
-                    <p><?php echo htmlspecialchars($row['content']); ?></p>
+                    <p>
+                        <?php
+                        $short_content = substr($row['content'], 0, 200);
+                        echo htmlspecialchars($short_content) . '...'; 
+                        ?>
+                    </p>
+                    <a href="read-more.php?id=<?php echo $row['id']; ?>" class="read-more">Read more</a>
                 </div>
             <?php endwhile; ?>
         </div>
