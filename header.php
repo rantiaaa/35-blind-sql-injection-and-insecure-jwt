@@ -1,10 +1,12 @@
 <header>
-    <h1>WikiWow</h1>
-    <nav>
-        <a href="index.php">Home</a>
-        <a href="login.php">Login</a>
-        <a href="register.php">Register</a>
-        <a href="my-account.php">My Account</a>
-        <a href="logout.php">Logout</a>
-    </nav>
+    <div class="navbar">
+        <h1 class="logo">WikiWow</h1>
+        <nav class="nav-links">
+            <a href="index.php">Home</a>
+            <a href="login.php">Login</a>
+            <a href="register.php">Register</a>
+            <a href="profile.php">My Profile</a>
+            <a href="logout.php">Logout</a>
+        </nav>
+    </div>
 </header>

@@ -31,23 +31,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <div class="navbar">
-        <div>
+        <div class="nav-links">
             <a href="dashboard.php">Dashboard</a>
-            <a href="my-account.php">My Account</a>
+            <a href="profile.php">My Profile</a>
         </div>
-        <div>
+        <div class="nav-links">
             <a href="logout.php">Logout</a>
         </div>
     </div>
 
     <div class="container">
         <h2>Admin Dashboard - Add Article</h2>
-        <form method="POST" action="d
+        <form method="POST" action="dashboard.php">
+            <label for="title">Article Title:</label>
+            <input type="text" id="title" name="title" placeholder="Enter article title" required>
+
+            <label for="content">Article Content:</label>
+            <textarea id="content" name="content" placeholder="Enter article content" rows="6" required></textarea>
+
+            <button class="button" type="submit">Add Article</button>
+        </form>
+    </div>
+</body>
+
+</html>
