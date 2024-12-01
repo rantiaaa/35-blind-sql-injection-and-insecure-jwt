@@ -3,24 +3,31 @@ session_start();
 include('config.php');
 include('jwt.php');
 
+// Mengautentikasi apakah terdapat token JWT yang valid pada session? Dialkukan verifikasi melalui proses pemanggilan verify_jwt function.
 if (!isset($_SESSION['token']) || !verify_jwt($_SESSION['token'])) {
+    // jikalau invalid, maka akan dikembalikan ke login page.
     header('Location: login.php');
     exit;
 }
 
+// Token JWT akan didecode; kemudian mengecek apakah role dari user admin?
 $user_data = decode_payload($_SESSION['token']);
 if ($user_data['role'] !== 'admin') {
+    // Jikalau tidak, maka tidak diperbolehkan membuka laman dashboard.
     echo "You are not authorized to access this page.";
     exit;
 }
 
+// jikalau user melakukan POST?
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Title dan content akan disimpan dalam var. di bawah ini.
     $title = $_POST['title'];
     $content = $_POST['content'];
-
+    // Mengecek bilamana title dan content kosong, maka akan ditampilkan pesan error tertentu.
     if (empty($title) || empty($content)) {
         echo "Please fill in all fields.";
     } else {
+        // Jikalau tidak kosong, maka title dan content yang diinput akan dimasukkan ke dalam articles table.
         $stmt = $conn->prepare("INSERT INTO articles (title, content) VALUES (?, ?)");
         $stmt->bind_param("ss", $title, $content);
         $stmt->execute();

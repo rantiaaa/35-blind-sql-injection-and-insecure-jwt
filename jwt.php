@@ -1,4 +1,5 @@
-<?php
+<!-- <?php
+/*Blind SQL Injection*/
 $secret = 'insecure_secret_key';
 
 /**
@@ -64,4 +65,4 @@ function decode_payload($token)
         return null;
     return json_decode(base64UrlDecode($parts[1]), true);
 }
-?>
+?> -->
