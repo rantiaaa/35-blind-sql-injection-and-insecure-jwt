@@ -3,15 +3,17 @@ session_start();
 include('config.php');
 include('jwt.php');
 
-/* Periksa apakah token JWT valid */
-if (!isset($_SESSION['token']) || !verify_jwt($_SESSION['token'])) {
+/* digunakan untuk memeriksa apakah JWT token terdapat di sesi tsb atau tidak. */
+if (!isset($_COOKIE['personal-session']) || !verify_jwt($_COOKIE['personal-session'])) {
     header('Location: login.php');
     exit;
 }
 
-/* Decode JWT tanpa validasi tambahan */
-$user_data = decode_payload($_SESSION['token']);
-if ($user_data['role'] !== 'admin') {
+/* Terdapat:
+1. proses encoding untuk mengetahui data data dari user (uname & role)
+2. Apakah role admin? jika bukan maka akses akan ditolak */
+$user_data = decode_payload($_COOKIE['personal-session']);
+if (!$user_data || $user_data['role'] !== 'admin') {
     echo "You are not authorized to access this page.";
     exit;
 }
@@ -24,12 +26,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['user_id'])) {
     echo "Role granted to user!";
 }
 
-/* Fitur pencarian user berdasarkan ID rentan terhadap SQL Injection */
-$search_result = null;
+/* Fitur pencarian user berdasarkan ID tanpa menampilkan detail pengguna */
+$search_message = null;
 if (isset($_GET['search_id']) && !empty($_GET['search_id'])) {
     $search_id = $_GET['search_id'];
-    $search_sql = "SELECT * FROM users WHERE id = $search_id";  // Rentan SQL Injection
+    // Query untuk memeriksa apakah ID ada dalam database
+    $search_sql = "SELECT id FROM users WHERE id = $search_id";  // Rentan SQL Injection
     $search_result = $conn->query($search_sql);
+    
+    if ($search_result && $search_result->num_rows > 0) {
+        $search_message = "User ID exists in database";
+    } else {
+        $search_message = "User ID doesn't exist in database";
+    }
 }
 
 $result = $conn->query("SELECT * FROM users");
@@ -68,20 +77,13 @@ $result = $conn->query("SELECT * FROM users");
             <button type="submit" class="button">Search User</button>
         </form>
 
-        <!-- Hasil Pencarian -->
-        <?php if ($search_result && $search_result->num_rows > 0): ?>
-            <?php while ($user = $search_result->fetch_assoc()): ?>
-                <div class="user-info">
-                    <h3>User Info</h3>
-                    <p>ID: <?php echo htmlspecialchars($user['id']); ?></p>
-                    <p>Username: <?php echo htmlspecialchars($user['username']); ?></p>
-                    <p>Role: <?php echo htmlspecialchars($user['role']); ?></p>
-                </div>
-            <?php endwhile; ?>
-        <?php elseif (isset($_GET['search_id'])): ?>
-            <p>No user found.</p>
+        <!-- Pesan Hasil Pencarian -->
+        <?php if (isset($search_message)): ?>
+            <p><?php echo htmlspecialchars($search_message); ?></p>
         <?php endif; ?>
+
         <br><br><br>
+
         <!-- Table -->
         <table class="admin-table">
             <thead>

@@ -3,15 +3,15 @@ session_start();
 include('config.php');
 include('jwt.php');
 
-// Mengautentikasi apakah terdapat token JWT yang valid pada session? Dialkukan verifikasi melalui proses pemanggilan verify_jwt function.
-if (!isset($_SESSION['token']) || !verify_jwt($_SESSION['token'])) {
-    // jikalau invalid, maka akan dikembalikan ke login page.
+// Mengautentikasi apakah terdapat token JWT yang valid pada cookie
+if (!isset($_COOKIE['personal-session']) || !verify_jwt($_COOKIE['personal-session'])) {
+    // Jika token tidak valid atau tidak ditemukan, redirect ke login
     header('Location: login.php');
     exit;
 }
 
 // Token JWT akan didecode; kemudian mengecek apakah role dari user admin?
-$user_data = decode_payload($_SESSION['token']);
+$user_data = decode_payload($_COOKIE['personal-session']);
 if ($user_data['role'] !== 'admin') {
     // Jikalau tidak, maka tidak diperbolehkan membuka laman dashboard.
     echo "You are not authorized to access this page.";
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <div class="navbar">
         <div class="nav-links">
-            <a href="dashboard.php">Dashboard</a>
+            <a href="index.php">Home</a>
             <a href="profile.php">My Profile</a>
         </div>
         <div class="nav-links">
@@ -59,14 +59,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 
     <div class="container">
-        <h2>Admin Dashboard - Add Article</h2>
+        <h2>Admin Dashboard <br> Add Article</h2>
         <form method="POST" action="dashboard.php">
             <label for="title">Article Title:</label>
             <input type="text" id="title" name="title" placeholder="Enter article title" required>
 
             <label for="content">Article Content:</label>
-            <textarea id="content" name="content" placeholder="Enter article content" rows="6" required></textarea>
+            <textarea id="content" name="content" placeholder="Enter article content" rows="6" required 
+            style="background-color: transparent; border: 1px solid #ccc; color: #333; font-size: 16px; width: 100%; padding: 10px;">
+            </textarea>
 
+            <br>
             <button class="button" type="submit">Add Article</button>
         </form>
     </div>

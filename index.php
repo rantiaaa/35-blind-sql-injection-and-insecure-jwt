@@ -3,16 +3,23 @@ session_start();
 include('config.php');
 include('jwt.php');
 
-/* Ambil parameter search tanpa sanitasi atau validasi */
-$search = isset($_GET['search']) ? $_GET['search'] : '';
+$search = isset($_GET['search']) ? '%' . $_GET['search'] . '%' : '%';
 
-/* Query langsung menggunakan input tanpa prepared statement */
-$sql = "SELECT * FROM articles WHERE title LIKE '%$search%'"; // Rentan terhadap SQL Injection
-$result = $conn->query($sql);
+$stmt = $conn->prepare("SELECT * FROM articles WHERE title LIKE ?");
+$stmt->bind_param("s", $search);
+$stmt->execute();
+$result = $stmt->get_result();
 
-/* Periksa keberadaan token JWT */
-$is_logged_in = isset($_SESSION['token']) && verify_jwt($_SESSION['token']);
-$username = $is_logged_in ? decode_payload($_SESSION['token'])['username'] : null;
+$is_logged_in = isset($_COOKIE['personal-session']) && verify_jwt($_COOKIE['personal-session']);
+
+if ($is_logged_in) {
+    $payload = decode_payload($_COOKIE['personal-session']);
+    $username = $payload['username'] ?? 'Guest';
+    $role = $payload['role'] ?? 'user'; // Ambil role dari payload JWT
+} else {
+    $username = 'Guest';
+    $role = 'guest';
+}
 ?>
 
 <!DOCTYPE html>
@@ -27,6 +34,24 @@ $username = $is_logged_in ? decode_payload($_SESSION['token'])['username'] : nul
     <link rel="stylesheet" href="css/style.css">
 </head>
 
+<style>
+    .navbar {
+        display: flex;
+        justify-content: space-between; /* Mengatur jarak antara logo dan link navigasi */
+        align-items: center;
+        padding: 10px 20px; /* Menambahkan ruang di kiri dan kanan navbar */
+    }
+
+    .logo {
+        margin: 0; /* Menghapus margin bawaan */
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 15px; /* Memberikan jarak antar link */
+    }
+</style>
+
 <body>
     <header>
         <div class="navbar">
@@ -34,6 +59,10 @@ $username = $is_logged_in ? decode_payload($_SESSION['token'])['username'] : nul
             <nav class="nav-links">
                 <a href="index.php"><i class="fas fa-home"></i> Home</a>
                 <?php if ($is_logged_in): ?>
+                    <a href="admin.php"><i class="fas fa-cogs"></i> Admin Panel</a>
+                    <?php if ($role === 'admin'): ?>
+                        <a href="dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <?php endif; ?>
                     <a href="profile.php"><i class="fas fa-user"></i> My Profile</a>
                     <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 <?php else: ?>
@@ -45,11 +74,7 @@ $username = $is_logged_in ? decode_payload($_SESSION['token'])['username'] : nul
     </header>
 
     <div class="container">
-        <?php if ($is_logged_in): ?>
-            <h1>Welcome, <?php echo htmlspecialchars($username); ?>!</h1>
-        <?php else: ?>
-            <h1>Welcome to WikiWow</h1>
-        <?php endif; ?>
+        <h1>Welcome to WikiWow, <?php echo htmlspecialchars($username); ?>!</h1>
         <form method="GET" action="index.php">
             <input type="text" name="search"
                 value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>"
