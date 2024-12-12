@@ -37,18 +37,18 @@ if ($is_logged_in) {
 <style>
     .navbar {
         display: flex;
-        justify-content: space-between; /* Mengatur jarak antara logo dan link navigasi */
+        justify-content: space-between; 
         align-items: center;
-        padding: 10px 20px; /* Menambahkan ruang di kiri dan kanan navbar */
+        padding: 10px 20px; 
     }
 
     .logo {
-        margin: 0; /* Menghapus margin bawaan */
+        margin: 0; 
     }
 
     .nav-links {
         display: flex;
-        gap: 15px; /* Memberikan jarak antar link */
+        gap: 15px;
     }
 </style>
 
@@ -58,8 +58,8 @@ if ($is_logged_in) {
             <h1 class="logo">WikiWow</h1>
             <nav class="nav-links">
                 <a href="index.php"><i class="fas fa-home"></i> Home</a>
+                <a href="admin.php"><i class="fas fa-cogs"></i> Admin Panel</a>
                 <?php if ($is_logged_in): ?>
-                    <a href="admin.php"><i class="fas fa-cogs"></i> Admin Panel</a>
                     <?php if ($role === 'admin'): ?>
                         <a href="dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
                     <?php endif; ?>
